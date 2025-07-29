@@ -1,0 +1,162 @@
+mov R0, #0
+sw R0, #6
+// Retrieve most significant word from memory 1. Store contents of memory 1 to Memory 15.
+lw R1, #1
+sw R1, #15
+lw R1, #1
+
+mov R2, #0
+bne R1, R2, #7
+lw R1, #0
+bne R1, R2, #5
+mov R1, #0
+sw R1, #2
+sw R2, #3
+done
+
+
+//Checking MSB. If msb is 1 then change the fixed point to all 2s complement and store it in memory 0 and 1. Store sign bit in memory 4. Store carryout bit in Memory 8
+lw R1, #1
+msb R0, R1
+sw R0, #4
+lw R1, #4
+mov R2, #1
+bne R1, R2, #17
+lw R1, #0
+mov R2, #0
+bne R1, R2, #3
+mov R2, #1
+sw R2, #6
+
+lw R1, #0
+mov R2, #1
+not R0, R1
+add R0, R0, R2
+sw R0, #0
+
+lw R1, #1
+lw R2, #6
+not R0, R1
+add R0, R0, R2
+sw R0, #1
+
+sw R0, #15
+
+//Takes care of shifting the int part. Memory 5 contains MSB of the int number. Memory 6 contains how many shifts needed
+mov R0, #0
+sw R0, #6
+
+//if integer is 0 then replace memory 1 with fractional contents
+lw R1, #15
+mov R2, #0
+bne R1, R2, #3
+lw R1, #0
+sw R1, #1
+
+lw R3, #1
+msb R0, R3
+sw R0, #5
+lw R0, #6
+mov R3, #1
+add R0, R0, R3
+sw R0, #6
+lw R3, #1
+shl R3
+sw R3, #1
+mov R2, #1
+lw R1, #5
+bne R1, R2, #-12
+
+//Calculating E and Exponent. Memory 7 contains the exponent bit values. Memory 12 contains E
+lw R1, #6
+mov R2, #8
+sub R0, R2, R1
+
+sw R0, #12
+mov R2, #15
+add R0, R0, R2
+sw R0, #7
+
+//Int = 0 case
+lw R1, #15
+mov R2, #0
+bne R1, R2, #5
+lw R0, #6
+mov R2, #15
+sub R0, R2, R0
+sw R0, #7
+
+
+//Putting together the bits
+lw R1, #1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+
+lw R2, #7
+shl R2
+shl R2
+
+add R0, R1, R2
+sw R0, #3
+
+lw R1, #4
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+sw R1, #4
+
+add R0, R1, R0
+sw R0, #3
+
+//NOW TAKING CARE OF LAST 8 BITS OF MANTISSA. Memory 14 contains amt of shifts to do to LSW of number. Memory 13 contains shift counter. 
+
+//int is 0 case
+lw R1, #15
+mov R2, #0
+bne R1, R2, #6
+lw R3, #1
+shl R3
+shl R3
+sw R3, #2
+done
+
+lw R3, #1
+shl R3
+shl R3
+sw R3, #1
+
+lw R3, #12
+mov R2, #2
+sub R0, R3, R2
+sw R0, #14
+
+sw R0, #13
+
+//CHANGE AND MAKE SURE IT CHECKS CONDITION FIRST AND NOT AT THE END
+mov R2, #0
+lw R1, #13
+beq R1, R2, #10
+lw R3, #0
+shr R3
+sw R3, #0
+mov R1, #1
+lw R2, #13
+sub R0, R2, R1
+sw R0, #13
+mov R2, #1
+beq R1, R2, #-11
+
+lw R3, #0
+lw R2, #1
+add R0, R2, R3
+sw R0, #2
+
+done

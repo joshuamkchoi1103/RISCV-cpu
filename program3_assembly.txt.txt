@@ -1,0 +1,278 @@
+//Program 3
+//Ask for overall approach and identifyiing overflow for mantissas
+//Store Sign bit 1 in Memory 0
+//Store Exponent bits 1 in Memory 1 and Exponent bits 2 in Memory 2
+
+//Sign bit
+lw R1, #9
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+sw R1, #0
+
+//Exponent bit
+lw R1, #9
+shl R1
+shr R1
+shr R1
+shr R1
+sw R1, #1
+
+lw R1, #11
+shl R1
+shr R1
+shr R1
+shr R1
+sw R1, #2
+
+//Building 16 bit number. Check ipad notes. Store 1st number in Memory 4, 5. Store 2nd number in Memory 6, 7
+mov R1, #1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+
+lw R2, #9
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shr R2
+shr R2
+
+add R0, R1, R2
+sw R0, #4
+
+lw R1, #8
+shr R1
+shr R1
+shr R1
+shr R1
+add R0, R0, R1
+sw R0, #4
+
+lw R1, #8
+shl R1
+shl R1
+shl R1
+shl R1
+shr R1
+sw R1, #5
+
+//repeat for second number
+mov R1, #1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+
+lw R2, #11
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shr R2
+shr R2
+
+add R0, R1, R2
+sw R0, #6
+
+lw R1, #10
+shr R1
+shr R1
+shr R1
+shr R1
+add R0, R0, R1
+sw R0, #6
+
+lw R1, #10
+shl R1
+shl R1
+shl R1
+shl R1
+shr R1
+sw R1, #7
+
+//Exp are the same case. Memory 1 contains the shift value. Memory 8 contains the higher exponent value
+lw R1, #1
+lw R2, #2
+slt R0, R1, R2
+sw R0, #3
+//Branch will jump if The first number is less than the second number. Memory 3 contains the results of R1 < R2
+lw R1, #3
+mov R2, #0
+bne R1, R2, #6
+//Shifting Memory 6,7
+lw R1, #1
+lw R2, #2
+sub R0, R1, R2
+sw R0, #1
+sw R1, #8
+
+//Shifting Memory 4,5. Also handles shift value of 0 case. Memory 3 contains the results of R1 < R2
+lw R1, #3
+mov R2, #0
+beq R1, R2, #6
+lw R1, #1
+lw R2, #2
+sub R0, R2, R1
+sw R0, #1
+sw R2, #8
+
+//HANDLING IF SHIFT VALUE IS 0. CONTINUE RIGHT HERE WHERE YOU LEFT OFF.
+lw R1, #1
+mov R2, #0
+beq R1, R2, #19
+
+
+//Handling if shift value is greater than 0
+//When R1 < R2. Shift first number(Memory 4 and 5)
+lw R1, #3
+mov R2, #0
+beq R1, R2, #16
+lw R1, #4
+lsb R0, R1
+lw R2, #5
+add R0, R0, R2
+shr R0
+sw R0, #5
+shr R1
+sw R1, #4
+mov R1, #1
+lw R2, #1
+sub R0, R2, R1
+sw R0, #1
+mov R2, #0
+lw R1, #1
+bne R1, R2, #-14
+
+lw R1, #1
+mov R2, #0
+beq R1, R2, #19
+
+//When R1 > R2. Shift first number(Memory 6 and 7)
+lw R1, #3
+mov R2, #0
+bne R1, R2, #16
+lw R1, #6
+lsb R0, R1
+lw R2, #7
+add R0, R0, R2
+shr R0
+sw R0, #7
+shr R1
+sw R1, #6
+mov R1, #1
+lw R2, #1
+sub R0, R2, R1
+sw R0, #1
+mov R2, #0
+lw R1, #1
+bne R1, R2, #-14
+
+//NOW ADDING THE NUMBERS. Store MSB of LSW in Memory 1. Store MSB of MSW in Memory 2. Temp results in Memory 10 and 11
+lw R1, #5
+lw R2, #7
+add R0, R1, R2
+sw R0, #10
+msb R0, R0
+sw R0, #1
+lw R1, #10
+shl R1
+shr R1
+sw R1, #10
+
+lw R1, #4
+lw R2, #6
+add R0, R1, R2
+lw R1, #1
+add R0, R0, R1
+sw R0, #11
+msb R0, R0
+sw R0, #2
+
+//If Mantissa overflow, then shift the whole thing
+lw R1, #2
+mov R2, #0
+beq R1, R2, #14
+lw R1, #11
+lsb R0, R1
+lw R1, #10
+add R0, R0, R1
+shr R0
+sw R0, #10
+lw R1, #11
+shr R1
+sw R1, #11
+
+lw R1, #8
+mov R2, #1
+add R0, R1, R2
+sw R0, #8
+
+//Build our floating point accordingly
+
+//Sign bit
+lw R1, #0
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+sw R1, #13
+
+//exponent bits
+lw R1, #8
+shl R1
+shl R1
+lw R2, #13
+add R0, R1, R2
+sw R0, #13
+
+//mantissa bits
+lw R1, #11
+shl R1
+shl R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+lw R2, #13
+add R0, R2, R1
+sw R0, #13
+
+lw R1, #11
+shl R1
+shl R1
+shl R1
+shl R1
+sw R1, #12
+
+lw R2, #10
+shl R2
+shr R2
+shr R2
+shr R2
+shr R2
+add R0, R1, R2
+sw R0, #12
+
+
+done
+

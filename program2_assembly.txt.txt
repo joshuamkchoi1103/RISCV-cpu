@@ -1,0 +1,299 @@
+//Program 2
+//Check if both MSW and LSW are 0s
+lw R1, #4
+mov R2, #0
+bne R1, R2, #6
+lw R1, #5
+bne R1, R2, #4
+sw R2, #6
+sw R2, #7
+done
+
+//Loading MSW
+lw R1, #5
+
+//Storing sign bit in Memory 0
+msb R0, R1
+sw R0, #0
+
+//Storing value of Exp in Memory 1
+lw R1, #5
+shl R1
+shr R1
+shr R1
+shr R1
+sw R1, #1
+
+//Storing last 2 mantissa bits in Memory 2
+lw R1, #5
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+shr R1
+sw R1, #2
+
+
+//Compare Exp with 15. If Exp is greater than 15 then shl. If Exp is less than 15 then shr. Memory 3 contains the result of whether Exp is greater than or less than 15
+mov R2, #15
+lw R1, #1
+slt R0, R1, R2
+sw R0, #3
+lw R1, #3
+mov R2, #1
+beq R1, R2, #22
+//Exp greater than 15 case. Memory 8 contains the amount of shifts we need to do
+mov R2, #15
+lw R1, #1
+sub R0, R1, R2
+sw R0, #8
+lw R1, #8
+
+//E = 0 Case. 
+mov R2, #0
+bne R1, R2, #15
+mov R1, #1
+sw R1, #7
+lw R1, #4
+shr R1
+shr R1
+lw R2, #2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+add R0, R2, R1
+sw R0, #6
+
+//Consecutive jumps for Exp < 15
+lw R1, #3
+mov R2, #1
+beq R1, R2, #21
+
+//E = 1 Case.
+lw R1, #8
+mov R2, #1
+bne R1, R2, #18
+mov R1, #1
+shl R1
+lw R2, #2
+shr R2
+add R0, R1, R2
+sw R0, #7
+lw R1, #4
+shr R1
+lw R2, #2
+
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+shl R2
+
+add R0, R1, R2
+sw R0, #6
+
+//Consecutive jumps for Exp < 15
+lw R1, #3
+mov R2, #1
+beq R1, R2, #12
+
+//E = 2 Case
+lw R1, #8
+mov R2, #2
+bne R1, R2, #9
+mov R1, #1
+shl R1
+shl R1
+lw R2, #2
+add R0, R1, R2
+sw R0, #7
+
+lw R1, #4
+sw R1, #6
+
+//Consecutive jumps for Exp < 15
+lw R1, #3
+mov R2, #1
+beq R1, R2, #14
+
+//E > 2 Case. Memory 9 will store integer value as we go. Memory 8 contains shift amount.
+lw R1, #8
+mov R2, #3
+slt R0, R1, R2
+sw R0, #13
+lw R1, #13
+mov R2, #1
+beq R1, R2, #14
+
+mov R1, #1
+shl R1
+shl R1
+lw R2, #2
+add R0, R1, R2
+sw R0, #9
+
+//Consecutive jumps for Exp < 15
+lw R1, #3
+mov R2, #1
+beq R1, R2, #31
+
+mov R1, #2
+lw R2, #8
+sub R0, R2, R1
+sw R0, #8
+
+//Consecutive branching for E <= 2
+lw R1, #13
+mov R2, #1
+beq R1, R2, #20
+
+lw R1, #4
+msb R0, R1
+shl R1
+sw R1, #4
+lw R1, #9
+shl R1
+add R0, R1, R0
+sw R0, #9
+mov R1, #1
+lw R2, #8
+sub R0, R2, R1
+sw R0, #8
+lw R1, #8
+mov R2, #0
+bne R1, R2, #-14
+
+lw R1, #9
+sw R1, #7
+
+lw R1, #4
+sw R1, #6
+
+//Jump for cases where Exp > 15
+lw R1, #3
+mov R2, #1
+bne R1, R2, #31
+
+//Exp < 15 case. Amount of shift to the rights are in memory 8. Memory 14 contains temporary mantissa
+mov R1, #0
+sw R1, #7
+mov R1, #15
+lw R2, #1
+sub R0, R1, R2
+sw R0, #8
+
+lw R1, #2
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+
+lw R2, #4
+shr R2
+shr R2
+
+add R0, R1, R2
+sw R0, #14
+
+lw R0, #14
+shr R0
+sw R0, #14
+lw R1, #8
+mov R2, #1
+sub R0, R1, R2
+sw R0, #8
+lw R1, #8
+mov R2, #0
+bne R1, R2, #-9
+
+lw R1, #14
+sw R1, #6
+
+//2s comp if needed. Carry out bit is stored in Memory 15.
+lw R1, #0
+mov R2, #1
+bne R1, R2, #17
+lw R1, #6
+mov R2, #0
+sw R2, #15
+bne R1, R2, #3
+mov R1, #1
+sw R1, #15
+
+lw R1, #6
+not R0, R1
+mov R2, #1
+add R0, R0, R2
+sw R0, #6
+
+lw R1, #7
+not R0, R1
+lw R2, #15
+add R0, R0, R2
+sw R0, #7
+
+//If Exp > 24, then implicit answer
+mov R1, #15
+mov R2, #8
+add R0, R1, R2
+sw R0, #15
+lw R1, #15
+lw R2, #1
+slt R0, R1, R2
+sw R0, #14
+lw R1, #14
+mov R2, #0
+beq R1, R2, #22
+//Check sign bit
+lw R1, #0
+mov R2, #0
+bne R1, R2, #8
+mov R1, #0
+not R0, R1
+sw R0, #6
+shl R0
+shr R0
+sw R0, #7
+done
+
+mov R2, #0
+sw R2, #6
+mov R1, #1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+shl R1
+sw R1, #7
+
+lw R1, #4
+mov R2, #0
+bne R1, R2, #7
+lw R1, #5
+shl R1
+shr R1
+bne R1, R2, #3
+sw R2, #6
+sw R2, #7
+
+
+done
+
+
